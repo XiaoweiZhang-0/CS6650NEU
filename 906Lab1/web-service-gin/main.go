@@ -35,7 +35,7 @@ func main() {
 	//In Gin, the colon preceding id indicates that it is a path parameter
 	router.GET("/albums/:id", getAlbumByID)
 
-	router.Run("localhost:8081")
+	router.Run("localhost:8080")
 }
 
 // getAlbums responds with the list of all albums as JSON.
