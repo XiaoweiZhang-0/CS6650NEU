@@ -1,6 +1,8 @@
 package com.example;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -12,6 +14,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 import com.google.gson.Gson;
 import javax.servlet.http.Part;
@@ -19,6 +24,7 @@ import javax.servlet.http.Part;
 @WebServlet(name = "MusicAlbumServlet", urlPatterns = {"/albums/*"})
 @MultipartConfig
 public class MusicAlbumServlet extends HttpServlet{
+    private Set<String> albumIDSet = new HashSet<>();
     //Get 
     // @Override
     // protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -79,58 +85,69 @@ public class MusicAlbumServlet extends HttpServlet{
         // }
         String contentType = req.getContentType();
         Response response;
-        // Check if the request is multipart/form-data
-        if (contentType != null && contentType.startsWith("multipart/form-data")) {
-            // Handle the request as multipart/form-data
-            for (Part part : req.getParts()) {
-                // System.out.println(part.getName() + ": " + part.getSize() + " bytes");
-                res.getOutputStream().println(part.getName() + ": " + part.getSize() + " bytes");
-            }
-            Part imagePart = req.getPart("image");
-            Part profilePart = req.getPart("profile");
-            // res.getOutputStream().println(imagePart.getContentType());
-            // res.getOutputStream().println(profilePart.getContentType());
+        Gson gson = new Gson();
+        try{
+            // Check if the request is multipart/form-data
+            if (contentType != null && contentType.startsWith("multipart/form-data")) {
+                // Handle the request as multipart/form-data
+                for (Part part : req.getParts()) {
+                    // System.out.println(part.getName() + ": " + part.getSize() + " bytes");
+                    res.getOutputStream().println(part.getName() + ": " + part.getSize() + " bytes");
+                }
+                Part imagePart = req.getPart("image");
+                Part profilePart = req.getPart("profile");
+                // res.getOutputStream().println(imagePart.getContentType());
+                // res.getOutputStream().println(profilePart.getContentType());
 
-            if(imagePart == null || !"image/png".equals(imagePart.getContentType())) {
-                response = new ErrorResponse("Image file is not of type image/jpeg");
+                if(imagePart == null || !"image/png".equals(imagePart.getContentType())) {
+                    response = new ErrorResponse("Image file is not of type image/jpeg");
+                    res.setStatus(res.SC_BAD_REQUEST);
+                }
+                else if(profilePart == null ) {
+                    response = new ErrorResponse("Profile file does not exist");
+                    res.setStatus(res.SC_BAD_REQUEST);
+                }
+                else {
+                    //process the request
+
+
+                    //process the image
+                    InputStream imageInputStream = imagePart.getInputStream();                
+                    long imageSize = imagePart.getSize();
+
+                    //process the profile and store it as json file
+                    String profileJson = inputStreamToString(profilePart.getInputStream());
+                    Profile profile = gson.fromJson(profileJson, Profile.class);
+
+
+                    //info to store: albumID, profile
+                    String albumID = AlbumID.getAlbumID();
+                    albumIDSet.add(albumID);
+
+
+                    //Generate a new json file for the profile
+                    File file = new File("src/main/resources/"+albumID+".json");
+                    file.createNewFile();
+                    FileWriter fileWriter = new FileWriter(file);
+                    gson.toJson(profile, fileWriter);
+
+
+                    response = new AlbumResponse(albumID, String.valueOf(imageSize));
+                    res.setStatus(res.SC_OK);
+                    
+                }
+            } else {
+                // Handle other request types or respond with an error
+                response = new ErrorResponse("Input data is not of type multipart/form-data");
                 res.setStatus(res.SC_BAD_REQUEST);
             }
-            else if(profilePart == null ) {
-                response = new ErrorResponse("Profile file does not exist");
-                res.setStatus(res.SC_BAD_REQUEST);
-            }
-            else {
-                //process the request
-                //process the image
-                InputStream imageInputStream = imagePart.getInputStream();
-                // long imageSize = getStreamSize(imageInputStream);
-                
-                long imageSize = imagePart.getSize();
-
-                //process the profile
-                String profileJson = inputStreamToString(profilePart.getInputStream());
-                Gson gson = new Gson();
-                Profile profile = gson.fromJson(profileJson, Profile.class);
-
-                response = new AlbumResponse(AlbumID.getAlbumID(), String.valueOf(imageSize));
-                res.setStatus(res.SC_OK);
-                
-                //TODO: store the image and profile in a file and associate it with the album ID
-            }
-        } else {
-            // Handle other request types or respond with an error
-            response = new ErrorResponse("Input data is not of type multipart/form-data");
+        } catch (Exception e) {
+            response = new ErrorResponse(e.getMessage());
             res.setStatus(res.SC_BAD_REQUEST);
         }
 
-
- 
-
-        Gson gson = new Gson();
         res.getOutputStream().print(gson.toJson(response));
         res.getOutputStream().flush();
-        
-
 
     }
 
