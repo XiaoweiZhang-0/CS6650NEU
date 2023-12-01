@@ -24,3 +24,15 @@ class ErrorResponse extends Response{
     }
 }
 
+class profileResponse extends Response{
+    String artist;
+    String title;
+    String year;
+
+    profileResponse(String artist, String title, String year) {
+        this.artist = artist;
+        this.title = title;
+        this.year = year;
+    }
+}
+
