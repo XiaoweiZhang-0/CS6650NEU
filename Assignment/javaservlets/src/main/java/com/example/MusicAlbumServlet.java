@@ -26,7 +26,7 @@ public class MusicAlbumServlet extends HttpServlet{
     //Get 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
-        res.setContentType("text/plain");
+        res.setContentType("application/json");
 
         // check we have a URL!
         // if (urlPath == null || urlPath.isEmpty()) {
@@ -37,7 +37,7 @@ public class MusicAlbumServlet extends HttpServlet{
     
 
         String[] urlParams = req.getQueryString().split("&");
-        if(urlParams.length != 1) {
+        if(urlParams.length < 1) {
             res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             res.getWriter().write("missing paramterers");
             return;
@@ -57,7 +57,7 @@ public class MusicAlbumServlet extends HttpServlet{
                 }
                 else {
                     res.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    res.getWriter().write("album not found");
+                    res.getWriter().write("Key not found");
                     return;
                 }
             }
