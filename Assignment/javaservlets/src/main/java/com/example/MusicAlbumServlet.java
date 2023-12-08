@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 import com.google.gson.Gson;
 import javax.servlet.http.Part;
 
@@ -28,20 +27,21 @@ public class MusicAlbumServlet extends HttpServlet{
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         res.setContentType("application/json");
 
-        // check we have a URL!
-        // if (urlPath == null || urlPath.isEmpty()) {
-        //     res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        //     res.getWriter().write("invalid request");
-        //     return;
-        // }
-    
-
-        String[] urlParams = req.getQueryString().split("&");
-        if(urlParams.length < 1) {
+        //check if we have a parameter
+        if(req.getQueryString() == null) {
             res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             res.getWriter().write("missing paramterers");
             return;
         }
+            
+        //check if we have exactly one parameter
+        String[] urlParams = req.getQueryString().split("&");
+        if(urlParams.length > 1){
+            res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            res.getWriter().write("too many paramterers");
+            return;
+        }
+
 
         for(String param: urlParams) {
             String[] keyValue = param.split("=");
@@ -61,34 +61,15 @@ public class MusicAlbumServlet extends HttpServlet{
                     return;
                 }
             }
+            else{
+                res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                res.getWriter().write("invalid parameter");
+                return;
+            }
         }
 
-
-        // and now validate url path and return the response status code
-        // (and maybe also some value if input is valid)
-    
-        // if (!isGetUrlValid(urlParts)) {
-        //     res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        //     res.getWriter().write("not valid");
-        //     // res.getWriter().write(urlParts[0]);
-        // } else {
-        //     res.setStatus(HttpServletResponse.SC_OK);
-        //     // do any sophisticated processing with urlParts which contains all the url params
-        //     // TODO: process url params in `urlParts`
-
-        //     res.getWriter().write("It works!");
-        // }
-        // return;
     }
    
-    // private boolean isGetUrlValid(String[] urlParts) {
-    //     // TODO: validate the request url path according to the API spec
-    //     // urlParts = [, 1, seasons, 2019, day, 1, skier, 123]
-    //     if(urlParts.length != 1 || urlParts[0].equals("albums") == false) {
-    //         return false;
-    //     }
-    //     return true;
-    // }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
@@ -106,7 +87,7 @@ public class MusicAlbumServlet extends HttpServlet{
                 Part profilePart = req.getPart("profile");
 
                 if(imagePart == null || !"image/png".equals(imagePart.getContentType())) {
-                    response = new ErrorResponse("Image file is not of type image/jpeg");
+                    response = new ErrorResponse("Image file is not of type image/png");
                     res.setStatus(res.SC_BAD_REQUEST);
                 }
                 else if(profilePart == null ) {
