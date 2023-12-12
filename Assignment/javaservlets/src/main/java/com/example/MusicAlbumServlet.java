@@ -18,10 +18,13 @@ import java.util.Map;
 import com.google.gson.Gson;
 import javax.servlet.http.Part;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 @WebServlet(name = "MusicAlbumServlet", urlPatterns = {"/albums/*"})
 @MultipartConfig
 public class MusicAlbumServlet extends HttpServlet{
-    private Map<String, Profile> albums = new HashMap<>();
+    // private Map<String, Profile> albums = new HashMap<>();
+    private ConcurrentHashMap<String, Profile> albums = new ConcurrentHashMap<>();
     //Get 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {

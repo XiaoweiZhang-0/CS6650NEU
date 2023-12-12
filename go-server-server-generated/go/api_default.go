@@ -14,12 +14,39 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
+
 )
 
-var myMap = make(map[int]AlbumsProfile)
+var myMap = NewSafeMap()
+type SafeMap struct {
+    mu    sync.RWMutex
+    items map[string]interface{}
+}
+
+func NewSafeMap() *SafeMap {
+    return &SafeMap{
+        items: make(map[string]interface{}),
+    }
+}
+
+func (m *SafeMap) Set(key string, value interface{}) {
+    m.mu.Lock()
+    m.items[key] = value
+    m.mu.Unlock()
+}
+
+func (m *SafeMap) Get(key string) (interface{}, bool) {
+    m.mu.RLock()
+    value, ok := m.items[key]
+    m.mu.RUnlock()
+    return value, ok
+}
+
+var albumCount = 0
 var response struct {
-	ImageSize int64 `json:"imageSize"`
-	Key       int   `json:"key"`
+	AlbumID int `json:"AlbumID"`
+	ImageSize       int64   `json:"imageSize"`
 }
 
 func GetAlbumByKey(w http.ResponseWriter, r *http.Request) {
@@ -45,8 +72,8 @@ func GetAlbumByKey(w http.ResponseWriter, r *http.Request) {
 		if strings.Compare(key, "albumID") == 0 {
 			//check if the key is valid
 			//convert the string to int
-			albumKey, _ := strconv.Atoi(value[0])
-			if profile, ok := myMap[albumKey]; ok {
+			// albumKey, _ := strconv.Atoi(value[0])
+			if profile, ok := myMap.Get(value[0]); ok {
 				//if the key is valid, return the profile
 				w.WriteHeader(http.StatusOK)
 				json.NewEncoder(w).Encode(profile)
@@ -99,14 +126,15 @@ func NewAlbum(w http.ResponseWriter, r *http.Request) {
 		}
 
 		//generate a key for the album and store it in the map
-		key := len(myMap) + 1
-		myMap[key] = profile
+		albumCount++
+		// myMap[albumCount] = profile
+		myMap.Set(strconv.Itoa(albumCount), profile)
 
 		// Return the size of the image and the key of the album in JSON format
 		w.WriteHeader(http.StatusOK)
 		// Prepare the JSON response
 		response.ImageSize = imageSize
-		response.Key = key
+		response.AlbumID = albumCount
 		json.NewEncoder(w).Encode(response)
 		return
 	}
