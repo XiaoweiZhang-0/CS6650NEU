@@ -76,14 +76,14 @@ public class MultipartRequest {
         String serverType = scanner.next();
         scanner.close();
 
-        String baseUri = "https://";
+        String baseUri = "http://";
         String postUri;
         if(serverType.toLowerCase().equals("java")){
             
-            postUri = baseUri + ipAddr + ":8080/JavaServlets-1.0/albums";
+            postUri = baseUri + ipAddr + ":8080/JavaServlets-1.0";
         }
         else{
-            postUri = baseUri + ipAddr + ":8080/albums";
+            postUri = baseUri + ipAddr + ":8080";
         }
 
         List<Double> throughputs = new ArrayList<>();
@@ -202,9 +202,10 @@ public class MultipartRequest {
 
         @Override
         public void run() {
-            int connectionTimeout = 20; // milliseconds
-            int socketTimeout = 20; //  milliseconds
-            int connectionRequestTimeout = 20; //  milliseconds
+            List<Stats> reqStats = new ArrayList<>();
+            int connectionTimeout = 20* 100; // milliseconds
+            int socketTimeout = 30 * 100; //  milliseconds
+            int connectionRequestTimeout = 2 * 100; //  milliseconds
 
             RequestConfig requestConfig = RequestConfig.custom()
             .setConnectTimeout(connectionTimeout)
@@ -212,8 +213,8 @@ public class MultipartRequest {
             .setConnectionRequestTimeout(connectionRequestTimeout)
             .build();
             try (CloseableHttpClient httpClient = HttpClients.custom()
-            .setDefaultRequestConfig(requestConfig)
-            .build()) {
+                    .setDefaultRequestConfig(requestConfig)
+                    .build()) {
                 
                 
                 // Create MultipartEntityBuilder
@@ -239,10 +240,12 @@ public class MultipartRequest {
 
                     if(isRecord){
                         Stats postStat = performPostRequest(httpClient, uploadFile);
-                        reqStatsQueue.add(postStat);
+                        // reqStatsQueue.add(postStat);
+                        reqStats.add(postStat);
 
                         Stats getStat = performGetRequest(httpClient, request);
-                        reqStatsQueue.add(getStat);
+                        // reqStatsQueue.add(getStat);
+                        reqStats.add(getStat);
                     }
                     else{
                         performPostRequest(httpClient, uploadFile);
@@ -250,6 +253,7 @@ public class MultipartRequest {
                     }
 
                 }
+                reqStatsQueue.addAll(reqStats);
             } 
             catch(IOException e){
 

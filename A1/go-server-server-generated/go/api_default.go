@@ -15,10 +15,13 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 )
 
+var albumIDCounter int64
 var myMap = NewSafeMap()
+
 type SafeMap struct {
     mu    sync.RWMutex
     items map[string]interface{}
@@ -43,9 +46,20 @@ func (m *SafeMap) Get(key string) (interface{}, bool) {
     return value, ok
 }
 
+func NewAlbumID() string {
+    // Increment the counter and return the new value
+    return strconv.FormatInt(atomic.AddInt64(&albumIDCounter, 1), 10)
+}
+
+func (m *SafeMap) AddAlbum(albumInfo interface{}) string {
+    albumID := NewAlbumID() // Generate a new album ID
+    m.Set(albumID, albumInfo)
+    return albumID
+}
+
 var albumCount = 0
 var response struct {
-	AlbumID int `json:"AlbumID"`
+	AlbumID int64 `json:"AlbumID"`
 	ImageSize       int64   `json:"imageSize"`
 }
 
@@ -125,16 +139,17 @@ func NewAlbum(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		//generate a key for the album and store it in the map
-		albumCount++
+		// //generate a key for the album and store it in the map
+		// albumCount++
 		// myMap[albumCount] = profile
-		myMap.Set(strconv.Itoa(albumCount), profile)
+		// myMap.Set(strconv.Itoa(albumCount), profile)
+		albumID := myMap.AddAlbum(profile)
 
 		// Return the size of the image and the key of the album in JSON format
 		w.WriteHeader(http.StatusOK)
 		// Prepare the JSON response
 		response.ImageSize = imageSize
-		response.AlbumID = albumCount
+		response.AlbumID, err = strconv.ParseInt(albumID, 10, 64)
 		json.NewEncoder(w).Encode(response)
 		return
 	}

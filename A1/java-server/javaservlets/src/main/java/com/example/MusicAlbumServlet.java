@@ -13,8 +13,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import java.util.HashMap;
-import java.util.Map;
 import com.google.gson.Gson;
 import javax.servlet.http.Part;
 
@@ -89,17 +87,17 @@ public class MusicAlbumServlet extends HttpServlet{
                 Part imagePart = req.getPart("image");
                 Part profilePart = req.getPart("profile");
 
-                if(imagePart == null || !"image/png".equals(imagePart.getContentType())) {
-                    response = new ErrorResponse("Image file is not of type image/png");
-                    res.setStatus(res.SC_BAD_REQUEST);
-                }
-                else if(profilePart == null ) {
+                // if(imagePart == null || !"image/png".equals(imagePart.getContentType())) {
+                //     response = new ErrorResponse("Image file is not of type image/png");
+                //     res.setStatus(res.SC_BAD_REQUEST);
+                // }
+                if(profilePart == null ) {
                     response = new ErrorResponse("Profile file does not exist");
                     res.setStatus(res.SC_BAD_REQUEST);
                 }
                 else {
                     //process the image
-                    InputStream imageInputStream = imagePart.getInputStream();                
+                    // InputStream imageInputStream = imagePart.getInputStream();                
                     long imageSize = imagePart.getSize();
 
                     //process the profile

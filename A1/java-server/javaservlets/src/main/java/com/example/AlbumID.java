@@ -1,9 +1,11 @@
 package com.example;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 public class AlbumID {
-    static long albumID = 0;
+    static AtomicLong albumID = new AtomicLong();
     static String getAlbumID(){
-        albumID++;
-        return String.valueOf(albumID);
+        albumID.incrementAndGet();
+        return String.valueOf(albumID.get());
     }
 }
