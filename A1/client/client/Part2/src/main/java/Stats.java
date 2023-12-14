@@ -1,5 +1,3 @@
-package client;
-
 
 public class Stats {
     //
