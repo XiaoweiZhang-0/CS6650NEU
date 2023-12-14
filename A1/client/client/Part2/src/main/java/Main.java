@@ -45,12 +45,12 @@ public class Main {
         }
 
         List<Double> throughputs = new ArrayList<>();
-        List<Long> allThreadsTimes = new ArrayList<>();
+
         ConcurrentLinkedQueue<Stats> reqStatsQueue = new ConcurrentLinkedQueue<>();
         Utilities utils = new Utilities();
-
+        List<Long> allThreadsTimes = new ArrayList<>();
         for(int numThreadGroups : numThreadGroupsArray){
-
+            allThreadsTimes.clear();
             reqStatsQueue.clear();
             throughputs.add(LoadTest.loadTest(threadGroupSize, numThreadGroups, delay, postUri, reqStatsQueue, allThreadsTimes));
             
@@ -90,11 +90,5 @@ public class Main {
         allThreadsWallTime = allThreadsTimes.get(1);
         utils.plotThroughputPerSecond(reqStatsQueue, allThreadsStartTime, allThreadsWallTime);
     }
-
-    
-
-
-
-
 
 }
