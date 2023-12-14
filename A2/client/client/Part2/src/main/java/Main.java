@@ -50,7 +50,7 @@ public class Main {
         Utilities utils = new Utilities();
 
         for(int numThreadGroups : numThreadGroupsArray){
-
+            allThreadsTimes.clear();
             reqStatsQueue.clear();
             throughputs.add(LoadTest.loadTest(threadGroupSize, numThreadGroups, delay, postUri, reqStatsQueue, allThreadsTimes));
             
