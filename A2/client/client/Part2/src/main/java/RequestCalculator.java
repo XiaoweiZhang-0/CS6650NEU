@@ -1,4 +1,4 @@
-package client;
+
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 public class RequestCalculator {

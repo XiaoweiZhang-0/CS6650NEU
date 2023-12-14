@@ -80,6 +80,10 @@ public class Main {
             System.out.println(serverType + " server @"+ numThreadGroups +" numThreadGroups GET min response time: " + getLatencies.get(3) + " millisecs");
             System.out.println(serverType + " server @"+ numThreadGroups +" numThreadGroups GET max response time: " + getLatencies.get(4) + " millisecs");
 
+            //print out the number of successful and failed requests
+            RequestCalculator reqCalc = new RequestCalculator(reqStatsQueue);
+            System.out.println(serverType + " server @"+ numThreadGroups +" numThreadGroups successful requests: " + reqCalc.getSuccesRequests());
+            System.out.println(serverType + " server @"+ numThreadGroups +" numThreadGroups failed requests: " + reqCalc.getFailedRequests());
         }
 
         //plot the throughput
