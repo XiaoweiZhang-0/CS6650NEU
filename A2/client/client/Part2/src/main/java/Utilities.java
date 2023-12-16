@@ -59,9 +59,8 @@ public class Utilities {
                 csvWriter.append("\n");
                 csvWriter.flush();
                 csvWriter.close();
-                
+
             } catch (IOException e) {
-                e.printStackTrace();
             }
         }
         else{
@@ -79,7 +78,6 @@ public class Utilities {
                 csvWriter.close();
             }
             catch(IOException e){
-                e.printStackTrace();
             }
         }
 
@@ -136,6 +134,8 @@ public class Utilities {
                 FileReader reader = new FileReader(fileName);
                 BufferedReader br = new BufferedReader(reader);
                 String line = "";
+                //skip the first line
+                line = br.readLine();
                 while((line = br.readLine()) != null){
                     String[] values = line.split(",");
                     completionTimes.add(Long.parseLong(values[0]) + Long.parseLong(values[2]));

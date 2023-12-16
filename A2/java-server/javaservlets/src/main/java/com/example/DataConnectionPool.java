@@ -11,10 +11,9 @@ public class DataConnectionPool {
         dataSource.setUrl("jdbc:mysql://cs6650-1.cjutmtlyraca.us-west-2.rds.amazonaws.com:3306");
         dataSource.setUsername("admin");
         dataSource.setPassword("12345678");
-        dataSource.setMinIdle(5); // Minimum number of idle connections in the pool
-        dataSource.setMaxIdle(10); // Maximum number of idle connections in the pool
-        dataSource.setMaxTotal(25); // Maximum number of total connections
-        // Additional configuration as needed
+        dataSource.setMinIdle(2); // Minimum number of idle connections in the pool
+        dataSource.setMaxIdle(5); // Maximum number of idle connections in the pool
+        dataSource.setMaxTotal(30); // Maximum number of total connections
     }
 
     public static DataSource getDataSource() {

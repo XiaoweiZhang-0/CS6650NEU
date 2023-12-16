@@ -49,12 +49,11 @@ public class ApiTask implements Runnable{
         
         long startTime = System.currentTimeMillis();
         String requestType = "POST";
-
+        int responseCode = 500;
         for(int i = 0; i < MAX_RETRIES; i++){
             // Execute the request
             try {
                 int status = apiInstance.newAlbumWithHttpInfo(image, profile).getStatusCode();
-
                 if (status >= 200 && status < 300) {
                     if(isRecord){
                         long latency = System.currentTimeMillis() - startTime;
@@ -63,12 +62,17 @@ public class ApiTask implements Runnable{
                     return;                    
                 } else if (status >= 400 && status < 600) {
                     // Retry on 4XX and 5XX
+                    responseCode = status;
                     continue;
                 }
             }
             catch(ApiException e){
-                System.out.println(e.getCode() + " " + e.getResponseBody() + " " + e.getMessage() + " " + e.getResponseHeaders());
+                
             }
+        }
+        if(isRecord){
+                long latency = System.currentTimeMillis() - startTime;
+                Utilities.recordReqStatstoCSV(this.fileName, startTime, requestType, latency, responseCode);
         }
         return;
     }
@@ -77,11 +81,12 @@ public class ApiTask implements Runnable{
     private void performGetRequest(DefaultApi apiInstance) {
         long startTime = System.currentTimeMillis();
         String requestType = "GET";
+        int responseCode = 500;
 
         for(int i = 0; i < MAX_RETRIES; i++){
             // Execute the request
             try {
-                int status = apiInstance.getAlbumByKeyWithHttpInfo("b007ee90-1f04-4b73-ab40-d854a167aa74").getStatusCode();
+                int status = apiInstance.getAlbumByKeyWithHttpInfo("8671f879-72cd-4d1b-bb6e-431a9bb5935b").getStatusCode();
                 // int status = response.getStatusLine().getStatusCode();
 
                 if (status >= 200 && status < 300) {
@@ -92,12 +97,17 @@ public class ApiTask implements Runnable{
                     return;                    
                 } else if (status >= 400 && status < 600) {
                     // Retry on 4XX and 5XX
+                    responseCode = status;
                     continue;
                 }
             }
             catch(ApiException e){
-                e.printStackTrace();
+
             }
+        }
+        if(isRecord){
+                long latency = System.currentTimeMillis() - startTime;
+                Utilities.recordReqStatstoCSV(this.fileName, startTime, requestType, latency, responseCode);
         }
         return;
     }

@@ -4,3 +4,5 @@ server
 *.csv
 goServer
 *.png
+
+**/*:Zone.Identifier
