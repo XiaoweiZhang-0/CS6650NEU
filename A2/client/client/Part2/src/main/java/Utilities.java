@@ -1,5 +1,7 @@
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -7,7 +9,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -23,37 +27,62 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
+
 public class Utilities {
 
     public Utilities() {
     }
     
     //Function to record the request statistics to a csv file
-    public void recordReqStatstoCSV(String fileName, ConcurrentLinkedQueue<Stats> reqStatsQueue){
-        try {
-            FileWriter csvWriter = new FileWriter(fileName);
-            csvWriter.append("Start Time");
-            csvWriter.append(",");
-            csvWriter.append("Request Type");
-            csvWriter.append(",");
-            csvWriter.append("Latency");
-            csvWriter.append(",");
-            csvWriter.append("Response Code");
-            csvWriter.append("\n");
-            for (Stats stat : reqStatsQueue) {
-                csvWriter.append(Long.toString(stat.getStartTime()));
+    public static void recordReqStatstoCSV(String fileName, long StartTime, String requestType, long latency, int responseCode){
+        Path path = Paths.get(fileName);
+        FileWriter csvWriter;
+        if(!Files.exists(path)){
+            try {
+                Files.createFile(path);
+                csvWriter = new FileWriter(fileName);
+                csvWriter.append("Start Time");
                 csvWriter.append(",");
-                csvWriter.append(stat.getRequestType());
+                csvWriter.append("Request Type");
                 csvWriter.append(",");
-                csvWriter.append(Long.toString(stat.getLatency()));
+                csvWriter.append("Latency");
                 csvWriter.append(",");
-                csvWriter.append(Integer.toString(stat.getResponseCode()));
+                csvWriter.append("Response Code");
                 csvWriter.append("\n");
+                csvWriter.append(Long.toString(StartTime));
+                csvWriter.append(",");
+                csvWriter.append(requestType);
+                csvWriter.append(",");
+                csvWriter.append(Long.toString(latency));
+                csvWriter.append(",");
+                csvWriter.append(Integer.toString(responseCode));
+                csvWriter.append("\n");
+                csvWriter.flush();
+                csvWriter.close();
+                
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            csvWriter.flush();
-            csvWriter.close();
-        } catch (IOException e) {
         }
+        else{
+            try{
+                csvWriter = new FileWriter(fileName, true);
+                csvWriter.append(Long.toString(StartTime));
+                csvWriter.append(",");
+                csvWriter.append(requestType);
+                csvWriter.append(",");
+                csvWriter.append(Long.toString(latency));
+                csvWriter.append(",");
+                csvWriter.append(Integer.toString(responseCode));
+                csvWriter.append("\n");
+                csvWriter.flush();
+                csvWriter.close();
+            }
+            catch(IOException e){
+                e.printStackTrace();
+            }
+        }
+
     }
 
     //Function to plot the throughput and save it as a png file
@@ -100,11 +129,21 @@ public class Utilities {
 
 
 
-    //Plot throughput per second
-    public void plotThroughputPerSecond(ConcurrentLinkedQueue<Stats> reqStatsQueue, long allThreadsStartTime, long allThreadsWallTime){
+    //Plot throughput per second for particular setup
+    public void plotThroughputPerSecond(String fileName, long allThreadsStartTime, long allThreadsWallTime){
         List<Long> completionTimes = new ArrayList<>();
-        for(Stats stat : reqStatsQueue){
-            completionTimes.add(stat.getStartTime() + stat.getLatency());
+        try{
+                FileReader reader = new FileReader(fileName);
+                BufferedReader br = new BufferedReader(reader);
+                String line = "";
+                while((line = br.readLine()) != null){
+                    String[] values = line.split(",");
+                    completionTimes.add(Long.parseLong(values[0]) + Long.parseLong(values[2]));
+                }
+                br.close();
+            }
+            catch(IOException e){
+                System.out.println("Error reading file");
         }
         Collections.sort(completionTimes);
         long startTime = allThreadsStartTime;
@@ -163,13 +202,24 @@ public class Utilities {
     }
 
     //Process the latencies for given request type
-    public List<Long> processLatencies(String requestType, ConcurrentLinkedQueue<Stats> reqStatsQueue){
+    public List<Long> processLatencies(String requestType, String fileName){
         List<Long> latencies = new ArrayList<>();
         List<Long> toReturn = new ArrayList<>();
-        for(Stats stat : reqStatsQueue){
-            if(stat.getRequestType().equals(requestType)){
-                latencies.add(stat.getLatency());
+        
+        try{
+            FileReader reader = new FileReader(fileName);
+            BufferedReader br = new BufferedReader(reader);
+            String line = "";
+            while((line = br.readLine()) != null){
+                String[] values = line.split(",");
+                if(values[1].equals(requestType)){
+                    latencies.add(Long.parseLong(values[2]));
+                }
             }
+            br.close();
+        }
+        catch(IOException e){
+            System.out.println("Error reading file");
         }
         Collections.sort(latencies);
         //get mean

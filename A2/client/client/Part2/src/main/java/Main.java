@@ -1,12 +1,7 @@
 
-import java.util.concurrent.*;
-
-
-
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 
 
@@ -38,22 +33,19 @@ public class Main {
         String postUri;
         if(serverType.toLowerCase().equals("java")){
             
-            postUri = baseUri + ipAddr + ":8080/JavaServlets-1.0";
+            postUri = baseUri + ipAddr + ":80/JavaServlets-1.0";
         }
         else{
-            postUri = baseUri + ipAddr + ":8080";
+            postUri = baseUri + ipAddr+":8080";
         }
 
         List<Double> throughputs = new ArrayList<>();
         List<Long> allThreadsTimes = new ArrayList<>();
-        ConcurrentLinkedQueue<Stats> reqStatsQueue = new ConcurrentLinkedQueue<>();
         Utilities utils = new Utilities();
+        List<String> fileNames = new ArrayList<>();
 
         for(int numThreadGroups : numThreadGroupsArray){
             allThreadsTimes.clear();
-            reqStatsQueue.clear();
-            throughputs.add(LoadTest.loadTest(threadGroupSize, numThreadGroups, delay, postUri, reqStatsQueue, allThreadsTimes));
-            
             String fileName;
             if(serverType.toLowerCase().equals("java")){
                 fileName = "reqStatsJava" + numThreadGroups + ".csv";
@@ -61,11 +53,17 @@ public class Main {
             else{
                 fileName = "reqStatsGo" + numThreadGroups + ".csv";
             }
-            //write out the request stats into a csv file
-            utils.recordReqStatstoCSV(fileName, reqStatsQueue);
+            throughputs.add(LoadTest.loadTest(fileName, threadGroupSize, numThreadGroups, delay, postUri, allThreadsTimes));
+            fileNames.add(fileName);
+
+            
+            //print out the configuration of the test
+            System.out.println("Number of thread groups: " + numThreadGroups);
+            System.out.println("Thread group size: " + threadGroupSize);
+            System.out.println("Delay: " + delay);
 
             // calculate mean, median, p99, min, max for POST
-            List<Long> postLatencies = utils.processLatencies("POST", reqStatsQueue);
+            List<Long> postLatencies = utils.processLatencies("POST", fileName);
             System.out.println(serverType + " server @"+ numThreadGroups +" numThreadGroups POST mean response time: " + postLatencies.get(0) + " millisecs");
             System.out.println(serverType + " server @"+ numThreadGroups +" numThreadGroups POST median response time: " + postLatencies.get(1) + " millisecs");
             System.out.println(serverType + " server @"+ numThreadGroups +" numThreadGroups POST p99 response time: " + postLatencies.get(2) + " millisecs");
@@ -73,7 +71,7 @@ public class Main {
             System.out.println(serverType + " server @"+ numThreadGroups +" numThreadGroups POST max response time: " + postLatencies.get(4) + " millisecs");
 
             //calculate mean, median, p99, min, max for GET
-            List<Long> getLatencies = utils.processLatencies("GET", reqStatsQueue);
+            List<Long> getLatencies = utils.processLatencies("GET", fileName);
             System.out.println(serverType + " server @"+ numThreadGroups +" numThreadGroups GET mean response time: " + getLatencies.get(0) + " millisecs");
             System.out.println(serverType + " server @"+ numThreadGroups +" numThreadGroups GET median response time: " + getLatencies.get(1) + " millisecs");
             System.out.println(serverType + " server @"+ numThreadGroups +" numThreadGroups GET p99 response time: " + getLatencies.get(2) + " millisecs");
@@ -81,7 +79,7 @@ public class Main {
             System.out.println(serverType + " server @"+ numThreadGroups +" numThreadGroups GET max response time: " + getLatencies.get(4) + " millisecs");
 
             //print out the number of successful and failed requests
-            RequestCalculator reqCalc = new RequestCalculator(reqStatsQueue);
+            RequestCalculator reqCalc = new RequestCalculator(fileName);
             System.out.println(serverType + " server @"+ numThreadGroups +" numThreadGroups successful requests: " + reqCalc.getSuccesRequests());
             System.out.println(serverType + " server @"+ numThreadGroups +" numThreadGroups failed requests: " + reqCalc.getFailedRequests());
         }
@@ -89,10 +87,11 @@ public class Main {
         //plot the throughput
         utils.plotThroughput(numThreadGroupsArray, throughputs, serverType);
         
+        String fileName = fileNames.get(fileNames.size() - 1);
         //Step 6: plot the throughput per second
         allThreadsStartTime = allThreadsTimes.get(0);
         allThreadsWallTime = allThreadsTimes.get(1);
-        utils.plotThroughputPerSecond(reqStatsQueue, allThreadsStartTime, allThreadsWallTime);
+        utils.plotThroughputPerSecond(fileName, allThreadsStartTime, allThreadsWallTime);
     }
 
     

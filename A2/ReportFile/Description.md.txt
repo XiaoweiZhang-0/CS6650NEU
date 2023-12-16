@@ -1,0 +1,14 @@
+Data model
+
+My database includes a table called albums which consist of 5 columns
+
+1. ID: int
+2. Artist: String
+3. image: BLOB
+4. title: String
+5. year: String
+
+I'm using AWS RDS MySQL database in my implementation and my server side contains a database connection pool that controls the total connections to the database from the servlet. 
+
+Note to get the valid key for new album, each time the servlet starts, it will query from the database once to get the next available  ID to keep the key autoincrementing
+

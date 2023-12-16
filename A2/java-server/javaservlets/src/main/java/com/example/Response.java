@@ -7,12 +7,17 @@ public abstract class Response {
 class AlbumResponse extends Response{
         String albumID;
         String imageSize;
-
+        String description;
         AlbumResponse(String albumID, String imageSize) {
             this.albumID = albumID;
             this.imageSize = imageSize;
             // this.description = description;
         }
+        // AlbumResponse(int albumID, String imageSize, String description) {
+        //     this.albumID = albumID;
+        //     this.imageSize = imageSize;
+        //     this.description = description;
+        // }
 }
 
 class ErrorResponse extends Response{
@@ -28,11 +33,12 @@ class profileResponse extends Response{
     String artist;
     String title;
     String year;
-
+    // String description;
     profileResponse(String artist, String title, String year) {
         this.artist = artist;
         this.title = title;
         this.year = year;
     }
+
 }
 
