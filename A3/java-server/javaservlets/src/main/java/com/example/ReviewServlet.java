@@ -1,13 +1,16 @@
 package com.example;
 
 import java.io.IOException;
+// import java.util.logging.LogManager;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import com.google.gson.Gson;
 
 
@@ -20,6 +23,7 @@ public class ReviewServlet extends HttpServlet{
     // private Map<String, Profile> albums = new HashMap<>();
     // private ConcurrentHashMap<String, Profile> albums = new ConcurrentHashMap<>();
     private final static String NOTFOUND = "Album not found";
+    private static final Logger logger = LogManager.getLogger(ReviewServlet.class);
     @Override
     public void init() throws ServletException{
         super.init();
@@ -33,17 +37,18 @@ public class ReviewServlet extends HttpServlet{
         try{
             Gson gson = new Gson();
                 //get the request parameters
-            String pathInfo = req.getQueryString();
-            String[] urlParams = pathInfo.split("&");
+            String pathInfo = req.getPathInfo();
+            // logger.error(pathInfo);
+            String[] urlParams = pathInfo.split("/");
             
-            if(urlParams.length != 2){
+            if(urlParams.length != 3){
                 res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 Response response = new ErrorResponse("invalid path " + pathInfo);
                 res.getWriter().write(gson.toJson(response));
                 return;
             }
-            String isLike = urlParams[0].split("=")[1];
-            String albumID = urlParams[1].split("=")[1];
+            String isLike = urlParams[1];
+            String albumID = urlParams[2];
             try{
                 Send send = new Send();
                 String responseMessage = send.sendMsg(albumID + "::" + isLike);
