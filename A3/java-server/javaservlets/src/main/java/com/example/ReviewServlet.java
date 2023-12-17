@@ -20,8 +20,6 @@ import com.google.gson.Gson;
 maxFileSize = 1024 * 1024 * 50,
 maxRequestSize = 1024 * 1024 * 100)
 public class ReviewServlet extends HttpServlet{
-    // private Map<String, Profile> albums = new HashMap<>();
-    // private ConcurrentHashMap<String, Profile> albums = new ConcurrentHashMap<>();
     private final static String NOTFOUND = "Album not found";
     private static final Logger logger = LogManager.getLogger(ReviewServlet.class);
     @Override

@@ -10,8 +10,8 @@ import java.sql.SQLException;
 public class DatabaseService {
 
     public void postReview(String albumID, String likeorDislike) throws SQLException {
-        System.out.println(likeorDislike);
-        System.out.println(albumID);
+        // System.out.println(likeorDislike);
+        // System.out.println(albumID);
         String sql = "";
         if(likeorDislike.equals("like")){
             sql = "UPDATE CS6650.albums SET likes = likes + 1 Where id = ?";
