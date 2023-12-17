@@ -13,18 +13,18 @@ public class LoadTest {
         //hard initialization
 
         // Initialization phase: 10 threads, each calling POST and GET 100 times
-        ExecutorService initExecutor = Executors.newFixedThreadPool(10);
-        CountDownLatch initLatch = new CountDownLatch(10);
-        for (int i = 0; i < 10; i++) {
-            initExecutor.execute(new ApiTask(fileName, baseUri, 100, initLatch, false));
-        }
+        // ExecutorService initExecutor = Executors.newFixedThreadPool(10);
+        // CountDownLatch initLatch = new CountDownLatch(10);
+        // for (int i = 0; i < 10; i++) {
+        //     initExecutor.execute(new ApiTask(fileName, baseUri, 100, initLatch, false));
+        // }
     
-        try {
-            initLatch.await(); // Wait for initialization phase to complete
-            initExecutor.shutdown();
-        } catch (InterruptedException e) {
-            System.err.println("Initialization phase interrupted: " + e.getMessage());
-        }
+        // try {
+        //     initLatch.await(); // Wait for initialization phase to complete
+        //     initExecutor.shutdown();
+        // } catch (InterruptedException e) {
+        //     System.err.println("Initialization phase interrupted: " + e.getMessage());
+        // }
 
 
 

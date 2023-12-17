@@ -10,7 +10,7 @@ import java.util.UUID;
 
 
 public class DatabaseService {
-    public String addAlbum(Profile profile, InputStream imageBytes) {
+    public String addAlbum(Profile profile, InputStream imageBytes) throws SQLException{
         // DataSource ds = DataConnectionPool.getDataSource();
         UUID uuid = UUID.randomUUID();
         String uuidAsString = uuid.toString();
@@ -25,9 +25,6 @@ public class DatabaseService {
     
             pstmt.executeUpdate();
             return uuidAsString;
-        } catch (SQLException e) {
-            // Handle exceptions
-            return "";
         }
     }
 

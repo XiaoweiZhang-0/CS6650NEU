@@ -113,13 +113,13 @@ public class Utilities {
         }
 
         // Display the chart
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Throughput Chart");
-            frame.setContentPane(new ChartPanel(chart));
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.pack();
-            frame.setVisible(true);
-        });
+        // SwingUtilities.invokeLater(() -> {
+        //     JFrame frame = new JFrame("Throughput Chart");
+        //     frame.setContentPane(new ChartPanel(chart));
+        //     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //     frame.pack();
+        //     frame.setVisible(true);
+        // });
     }
 
 
@@ -128,7 +128,7 @@ public class Utilities {
 
 
     //Plot throughput per second for particular setup
-    public void plotThroughputPerSecond(String fileName, long allThreadsStartTime, long allThreadsWallTime){
+    public void plotThroughputPerSecond(String fileName, long allThreadsStartTime, long allThreadsWallTime, int numThreadGroups){
         List<Long> completionTimes = new ArrayList<>();
         try{
                 FileReader reader = new FileReader(fileName);
@@ -184,20 +184,20 @@ public class Utilities {
 
         // Save the chart as a PNG
         try {
-            ChartUtils.saveChartAsPNG(new File("ThroughputPerSecondChart.png"), chart, 800, 600);
+            ChartUtils.saveChartAsPNG(new File(String.valueOf(numThreadGroups)+" ThroughputPerSecondChart.png"), chart, 800, 600);
             System.out.println("Chart saved as 'ThroughputPerSecondChart.png'");
         } catch (IOException e) {
             System.err.println("Error saving chart: " + e.getMessage());
         }
 
-        // Display the chart
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Throughput Per Second Chart");
-            frame.setContentPane(new ChartPanel(chart));
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.pack();
-            frame.setVisible(true);
-        });
+        // // Display the chart
+        // SwingUtilities.invokeLater(() -> {
+        //     JFrame frame = new JFrame("Throughput Per Second Chart");
+        //     frame.setContentPane(new ChartPanel(chart));
+        //     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //     frame.pack();
+        //     frame.setVisible(true);
+        // });
 
     }
 

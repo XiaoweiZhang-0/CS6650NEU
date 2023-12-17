@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import io.swagger.client.ApiException;
 import io.swagger.client.api.DefaultApi;
 import io.swagger.client.model.AlbumsProfile;
@@ -18,7 +21,8 @@ public class ApiTask implements Runnable{
     private boolean isRecord;
     private static final int MAX_RETRIES = 5;
     private String fileName;
-    private String albumID = "c861f8d1-6791-466a-a3e9-49aee42d5e4a";
+    private String albumID = "3c40bc8b-881e-464e-bdc1-be953b014ee2";
+    private Logger logger = LogManager.getLogger(ApiTask.class);
 
     public ApiTask(String fileName, String baseUrl,  int numIterations, CountDownLatch latch, boolean isRecord) {
         this.baseUrl = baseUrl;
@@ -26,7 +30,6 @@ public class ApiTask implements Runnable{
         this.numIterations = numIterations;
         this.isRecord = isRecord;
         this.fileName = fileName;
-        System.out.println("baseurl: " + baseUrl);
     }
 
 
@@ -74,7 +77,7 @@ public class ApiTask implements Runnable{
                 }
             }
             catch(ApiException e){
-                e.printStackTrace();
+                logger.error(e.getMessage());
             }
         }
         if(isRecord){
@@ -109,7 +112,7 @@ public class ApiTask implements Runnable{
                 }
             }
             catch(Exception e){
-                e.printStackTrace(); 
+                logger.error(e.getMessage());
             }
         }
         if(isRecord){

@@ -63,7 +63,7 @@ public class Main {
             System.out.println("Delay: " + delay);
 
             // calculate mean, median, p99, min, max for POST
-            List<Long> postLatencies = utils.processLatencies("POST", fileName);
+            List<Long> postLatencies = utils.processLatencies("POSTAlbum", fileName);
             System.out.println(serverType + " server @"+ numThreadGroups +" numThreadGroups POST mean response time: " + postLatencies.get(0) + " millisecs");
             System.out.println(serverType + " server @"+ numThreadGroups +" numThreadGroups POST median response time: " + postLatencies.get(1) + " millisecs");
             System.out.println(serverType + " server @"+ numThreadGroups +" numThreadGroups POST p99 response time: " + postLatencies.get(2) + " millisecs");
@@ -71,7 +71,7 @@ public class Main {
             System.out.println(serverType + " server @"+ numThreadGroups +" numThreadGroups POST max response time: " + postLatencies.get(4) + " millisecs");
 
             //calculate mean, median, p99, min, max for GET
-            List<Long> getLatencies = utils.processLatencies("GET", fileName);
+            List<Long> getLatencies = utils.processLatencies("POSTReview", fileName);
             System.out.println(serverType + " server @"+ numThreadGroups +" numThreadGroups GET mean response time: " + getLatencies.get(0) + " millisecs");
             System.out.println(serverType + " server @"+ numThreadGroups +" numThreadGroups GET median response time: " + getLatencies.get(1) + " millisecs");
             System.out.println(serverType + " server @"+ numThreadGroups +" numThreadGroups GET p99 response time: " + getLatencies.get(2) + " millisecs");
@@ -82,16 +82,16 @@ public class Main {
             RequestCalculator reqCalc = new RequestCalculator(fileName);
             System.out.println(serverType + " server @"+ numThreadGroups +" numThreadGroups successful requests: " + reqCalc.getSuccesRequests());
             System.out.println(serverType + " server @"+ numThreadGroups +" numThreadGroups failed requests: " + reqCalc.getFailedRequests());
+        
+            allThreadsStartTime = allThreadsTimes.get(0);
+            allThreadsWallTime = allThreadsTimes.get(1);
+            utils.plotThroughputPerSecond(fileName, allThreadsStartTime, allThreadsWallTime, numThreadGroups);
         }
 
-        //plot the throughput
+        // //plot the throughput
         utils.plotThroughput(numThreadGroupsArray, throughputs, serverType);
         
-        String fileName = fileNames.get(fileNames.size() - 1);
-        //Step 6: plot the throughput per second
-        allThreadsStartTime = allThreadsTimes.get(0);
-        allThreadsWallTime = allThreadsTimes.get(1);
-        utils.plotThroughputPerSecond(fileName, allThreadsStartTime, allThreadsWallTime);
+
     }
 
     

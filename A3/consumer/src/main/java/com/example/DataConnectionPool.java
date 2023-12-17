@@ -13,7 +13,7 @@ public class DataConnectionPool {
         dataSource.setPassword("12345678");
         dataSource.setMinIdle(2); // Minimum number of idle connections in the pool
         dataSource.setMaxIdle(5); // Maximum number of idle connections in the pool
-        dataSource.setMaxTotal(30); // Maximum number of total connections
+        dataSource.setMaxTotal(60); // Maximum number of total connections
     }
 
     public static DataSource getDataSource() {

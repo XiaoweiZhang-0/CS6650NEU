@@ -50,20 +50,22 @@ public class ReviewServlet extends HttpServlet{
             String isLike = urlParams[1];
             String albumID = urlParams[2];
             try{
-                Send send = new Send();
-                String responseMessage = send.sendMsg(albumID + "::" + isLike);
-                if(responseMessage.equals(NOTFOUND)){
-                    res.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    Response response = new ErrorResponse(NOTFOUND);
-                    res.getWriter().write(gson.toJson(response));
-                    return;
-                }
-                else{
-                    res.setStatus(HttpServletResponse.SC_OK);
-                    return;
+                try (Send send = new Send()) {
+                    String responseMessage = send.sendMsg(albumID + "::" + isLike);
+                    if(responseMessage.equals(NOTFOUND)){
+                        res.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                        Response response = new ErrorResponse(NOTFOUND);
+                        res.getWriter().write(gson.toJson(response));
+                        return;
+                    }
+                    else{
+                        res.setStatus(HttpServletResponse.SC_OK);
+                        return;
+                    }
                 }
             }
             catch(Exception e){
+                logger.error("ERROR FROM REVIEW SERVLET SEND MESSAGE PART------------------------------------------------------"+e.getMessage());
                 res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 Response response = new ErrorResponse("Internal server error");
                 res.getWriter().write(gson.toJson(response));
@@ -71,7 +73,7 @@ public class ReviewServlet extends HttpServlet{
             }
 
         }catch(IOException e){}       
-
+            // logger.error("ERROR FROM REVIEW SERVLET OTHER PART------------------------------------------------------"+e.getMessage());
             //send the information to message queue
 
     }

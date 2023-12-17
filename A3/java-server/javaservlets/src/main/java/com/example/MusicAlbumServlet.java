@@ -7,12 +7,15 @@ import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.print.DocFlavor.READER;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import com.google.gson.Gson;
 
@@ -27,10 +30,15 @@ public class MusicAlbumServlet extends HttpServlet{
     // private Map<String, Profile> albums = new HashMap<>();
     // private ConcurrentHashMap<String, Profile> albums = new ConcurrentHashMap<>();
     private DatabaseService dbService;
+    private static final Logger logger = LogManager.getLogger(MusicAlbumServlet.class);
+    private Pattern pattern;
+    private Matcher matcher;
     @Override
     public void init() throws ServletException{
         super.init();
         dbService = new DatabaseService();
+        this.pattern = Pattern.compile("artist:\\s*(\\w+)\\s*title:\\s*(\\w+)\\s*year:\\s*(\\d+)");
+
     }
     //Get 
     @Override
@@ -96,16 +104,16 @@ public class MusicAlbumServlet extends HttpServlet{
                         String title = null;
                         String year = null;
 
-                        try (BufferedReader reader = new BufferedReader(
-                                new InputStreamReader(profilePart.getInputStream()))) {
+                        try {
+                                BufferedReader reader = new BufferedReader(
+                                new InputStreamReader(profilePart.getInputStream()));
                                 StringBuilder stringBuilder = new StringBuilder();
                                 String line;
                                 while ((line = reader.readLine()) != null) {
                                     stringBuilder.append(line);
                                 }
                                 String profileJson = stringBuilder.toString();
-                                Pattern pattern = Pattern.compile("artist:\\s*(\\w+)\\s*title:\\s*(\\w+)\\s*year:\\s*(\\d+)");
-                                Matcher matcher = pattern.matcher(profileJson);
+                                this.matcher = pattern.matcher(profileJson);
                                 if (matcher.find()) {
                                     artist = matcher.group(1);
                                     title = matcher.group(2);
@@ -115,18 +123,33 @@ public class MusicAlbumServlet extends HttpServlet{
                                     response = new ErrorResponse("Error processing profile");
                                     res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                                 }
+                        }catch(Exception e){
+                            logger.error("ERROR FROM ALBUM SERVLET PROCESSING ALBUM PART-----------------------------------------------"+e.getMessage());
                         }
-                        Profile profile = new Profile(artist, title, year);
-                        String ID = dbService.addAlbum(profile, imageInputStream);
+                        finally{
+                            profilePart.getInputStream().close();
+                        }
+                        try{
+                            Profile profile = new Profile(artist, title, year);
+                            String ID = dbService.addAlbum(profile, imageInputStream);
 
-                        if(ID.equals("")){
+                            if(ID.equals("")){
+                                response = new ErrorResponse("Error adding album to database");
+                                res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                            }
+                            else{
+                                response = new AlbumResponse(ID, String.valueOf(imageSize));
+                                res.setStatus(HttpServletResponse.SC_OK);
+                            }
+                        }catch(Exception e){
+                            logger.error("ERROR FROM ALBUM SERVLET ADDING ALBUM PART-----------------------------------------------"+e.getMessage());
                             response = new ErrorResponse("Error adding album to database");
                             res.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                         }
-                        else{
-                            response = new AlbumResponse(ID, String.valueOf(imageSize));
-                            res.setStatus(HttpServletResponse.SC_OK);
+                        finally{
+                            imagePart.getInputStream().close();
                         }
+
 
                 }
 

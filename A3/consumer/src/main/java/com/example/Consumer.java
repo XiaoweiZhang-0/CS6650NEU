@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import com.rabbitmq.client.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class Consumer {
+    private final static int GIVENNUMBER = 1000;
     private final static String QUEUE_NAME = "MessageQueue";
     private static DatabaseService dbService = new DatabaseService();
+    private static final Logger logger = LogManager.getLogger(Consumer.class);
     public static void main(String[] argv) throws Exception {
 
         ConnectionFactory factory = new ConnectionFactory();
@@ -38,8 +40,6 @@ public class Consumer {
                             System.out.println( "Callback thread ID = " + Thread.currentThread().getId() + " Received '" + message + "'");
                             String albumID = message.split("::")[0];
                             String likeorDislike = message.split("::")[1];
-                            System.out.println("albumID: " + albumID);
-                            System.out.println("likeorDislike: " + likeorDislike);
                             Consumer.dbService.postReview(albumID, likeorDislike);
                         } catch (SQLException e) {
                             response = "Album not found";
@@ -51,14 +51,14 @@ public class Consumer {
                     // process messages
                     channel.basicConsume(QUEUE_NAME, false, deliverCallback, consumerTag -> { });
                     } catch (IOException ex) {
-                        Logger.getLogger(Consumer.class.getName()).log(Level.SEVERE, null, ex);
+                        logger.error("ERROR FROM CONSUMER------------------------------------------------"+ex);
                 }
             }
         };
         // start threads and block to receive messages
-        Thread recv1 = new Thread(runnable);
-        Thread recv2 = new Thread(runnable);
-        recv1.start();
-        recv2.start();
+        for(int i=0; i<GIVENNUMBER ; i++){
+            Thread recv = new Thread(runnable);
+            recv.start();
+        }
     }
 }
